@@ -2,29 +2,48 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Card,Category,Transaction,Limit
+from .models import Card,Category,Transaction,Limit,Cash
 from django.http import Http404
-from .serializers import CardSerializer,CategorySerializer,TransactionSerializer,LimitSerializer
+from .serializers import CardSerializer,CategorySerializer,TransactionSerializer,LimitSerializer,CashSerializer
 from datetime import datetime
 from django.db.models import Avg, Max, Min,Sum
-from .models import  Card
 from blog.models import Token,User
+from rest_framework import generics
+from rest_framework import permissions
+from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated
 
 
-# class CardList(APIView):
-#     def get(self, request):
-#         cards = Card.objects.all()
-#         serializer = CardSerializer(cards, many=True)
-#         return Response(serializer.data)
+class CardAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        card_data = request.data
 
-#     def post(self, request):
-#         serializer = CardSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            token = Token.objects.get(token=card_data['token'])
+            user = token.user
+        except Token.DoesNotExist:
+            return Response({'message': 'Вы должны зарегистрироваться'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        card = Card(user=user, card_number=card_data['card_number'], expiration_date=card_data['expiration_date'], cvv=card_data['cvv'])
+        card.save()
+
+        serializer = CardSerializer(card)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get(self, request):
+        try:
+            token = Token.objects.get(token=request.GET.get('token'))
+            user = token.user
+        except Token.DoesNotExist:
+            return Response({'message': 'Вы должны зарегистрироваться'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        cards = Card.objects.filter(user=user)
+        serializer = CardSerializer(cards, many=True)
+        return Response(serializer.data)
 
 class CardDetail(APIView):
+    permission_classes  = (IsAuthenticated,)
     def get_object(self, pk):
         try:
             return Card.objects.get(pk=pk)
@@ -50,6 +69,7 @@ class CardDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class CategoryList(APIView):
+    permission_classes  = (IsAuthenticated,)
     def get(self, request):
         categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
@@ -63,6 +83,7 @@ class CategoryList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CategoryDetail(APIView):
+    permission_classes  = (IsAuthenticated,)
     def get_object(self, pk):
         try:
             return Category.objects.get(pk=pk)
@@ -90,6 +111,7 @@ class CategoryDetail(APIView):
 
 
 class UserSpending(APIView):
+    permission_classes  = (IsAuthenticated,)
     def get(self, request):
         transactions = Transaction.objects.all()
 
@@ -110,9 +132,8 @@ class UserSpending(APIView):
         return Response(data)
     
 
-
-
 class SpendingLimit(APIView):
+    permission_classes  = (IsAuthenticated,)
     def get(self, request, user_id):
         user = User.objects.get(id=user_id)
         current_month = datetime.now().month
@@ -140,36 +161,27 @@ class SpendingLimit(APIView):
         return Response({"exceeded_limits": exceeded_limits})
     
 
+class CashListCreateView(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Cash.objects.all()
+    serializer_class = CashSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Cash.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
+class CashDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Cash.objects.all()
+    serializer_class = CashSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-
-class CardAPIView(APIView):
-    def post(self, request):
-        card_data = request.data
-
-        try:
-            token = Token.objects.get(token=card_data['token'])
-            user = token.user
-        except Token.DoesNotExist:
-            return Response({'message': 'Вы должны зарегистрироваться'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        card = Card(user=user, card_number=card_data['card_number'], expiration_date=card_data['expiration_date'], cvv=card_data['cvv'])
-        card.save()
-
-        serializer = CardSerializer(card)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def get(self, request):
-        try:
-            token = Token.objects.get(token=request.GET.get('token'))
-            user = token.user
-        except Token.DoesNotExist:
-            return Response({'message': 'Вы должны зарегистрироваться'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        cards = Card.objects.filter(user=user)
-        serializer = CardSerializer(cards, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return Cash.objects.filter(user=self.request.user)
     
 
 

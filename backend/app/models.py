@@ -9,6 +9,7 @@ TYPES=(
 )
 
 class Cash(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
     summ = models.CharField(max_length=200)
 
     def __str__(self):

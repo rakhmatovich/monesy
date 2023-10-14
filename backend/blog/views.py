@@ -1,30 +1,60 @@
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.authtoken.models import Token
+from .serializers import UserSerializer
+from .models import User,Token,Login
 from django.contrib.auth import authenticate, login
-from .models import User
-from .serializers import UserSerializer,LoginSerializer
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
-class RegistrationAPIView(APIView):
+class UserRegistrationView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            user = User.objects.get(username=serializer.validated_data['username'])
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({"message": "Регистрация успешно завершена.", "token": token.key}, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
 class LoginAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            user = authenticate(request, email=serializer.validated_data['email'], password=serializer.validated_data['password'])
-            if user is not None:
-                login(request, user)
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({"message": "Авторизация успешно завершена.", "token": token.key}, status=status.HTTP_200_OK)
-            return Response({"message": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if email is None or password is None:
+            return Response({'error': 'Please provide both email and password'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.filter(email=email).first()
+
+        if not user:
+            return Response({'error': 'Invalid email'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user.check_password(password):
+            return Response({'error': 'Invalid password'}, status=status.HTTP_400_BAD_REQUEST)
+
+        token, _ = Token.objects.get_or_create(user=user)
+
+        login(request, user)
+
+        return Response({'token': token.token}, status=status.HTTP_200_OK)
+
+
+class RegisterTokenAPIView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = User.objects.create_user(username=username, password=password)
+
+        token = Token.objects.create(user=user)
+
+        return Response({'token': token.key})
+
+
+class AuthTokenAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({'message': 'Authenticated'})
