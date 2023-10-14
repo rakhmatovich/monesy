@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     "rest_framework",
+    "corsheaders",
 
     "app",
     "users",
@@ -53,6 +54,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+    "corsheaders.middleware.CorsMiddleware"
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -82,9 +85,9 @@ WSGI_APPLICATION = "backend.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'xakaton_misha',
-        'USER': 'postgres',
-        'PASSWORD': '20010508',
+        'NAME': 'monesy',
+        'USER': 'admin',
+        'PASSWORD': 'admin12345',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -113,14 +116,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticated',
     ]
 }
 
-CORS_ORIGIN_WHITELIST = (
-    'http://localhost:3000'
-)
-
+CORS_ORIGIN_ALLOW_ALL = DEBUG
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
