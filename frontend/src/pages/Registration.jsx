@@ -23,39 +23,42 @@ function Registration() {
             toast.error('Password does not match!')
             return
         }
+        try {
+            const registerData = JSON.stringify({
+                username: username.current.value,
+                password: password1.current.value,
+                email: email.current.value
+            })
 
-        const registerData = JSON.stringify({
-            username: username.current.value,
-            password: password1.current.value,
-            email: email.current.value
-        })
+            const config = {
+                method: 'post',
+                maxBodyLength: Infinity,
+                url: 'http://127.0.0.1:8000/register',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                data: registerData
+            };
 
-        const config = {
-            method: 'post',
-            maxBodyLength: Infinity,
-            url: 'http://127.0.0.1:8000/register/',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: registerData
-        };
+            const {status, data} = await axios.request(config)
 
-        const {status, data} = await axios.request(config)
-
-        switch (status) {
-            case 201: {
-                toast.success('You registered successfully!')
-                navigate('/')
-                localStorage.setItem('user', JSON.stringify(data))
-                break
+            switch (status) {
+                case 201: {
+                    toast.success('You registered successfully!')
+                    navigate('/')
+                    localStorage.setItem('user', JSON.stringify(data))
+                    break
+                }
+                case 400: {
+                    toast.error('Username or email is already in use!')
+                    break
+                }
+                default: {
+                    toast.error('Something went wrong!')
+                }
             }
-            case 400: {
-                toast.error('Username or email is already in use!')
-                break
-            }
-            default: {
-                toast.error('Something went wrong!')
-            }
+        } catch (e) {
+            toast.error('It seems you are offline!')
         }
     }
 

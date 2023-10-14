@@ -8,7 +8,7 @@ function Home() {
     return (
         <Layout>
             <Dashboard/>
-            <Transactions/>
+            <Transactions width={25}/>
         </Layout>
     );
 }
