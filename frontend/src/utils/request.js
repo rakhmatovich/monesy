@@ -5,7 +5,7 @@ export const domain = import.meta.env.VITE_APP_BASE_URL || `${window.location.pr
 
 //  Add Base URL and change snake_case to camelCase
 const baseAxios = axios.create({
-    baseURL: `${domain}/api/v1/`,
+    baseURL: `${domain}`,
     transformResponse: [
         ...axios.defaults.transformResponse,
         humps.camelizeKeys,

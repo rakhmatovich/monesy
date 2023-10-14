@@ -9,6 +9,7 @@ __pycache__/
 
 # Django stuff:
 *.log
+
 # Environments
 .env
 .venv
@@ -21,7 +22,6 @@ venv.bak/
 monday
 sys
 data/
-sys
 yarn.lock
 .idea
 
@@ -29,3 +29,14 @@ deploy/certificates/*
 # Local Netlify folder
 .netlify
 
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.venv
