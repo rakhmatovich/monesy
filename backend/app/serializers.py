@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Card,Category,Transaction
+from .models import Card,Category,Transaction,Cash
 
 class CardSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,3 +22,7 @@ class TransactionSerializer(serializers.ModelSerializer):
 class LimitSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('user','category','amount')
+
+class CashSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('summ')

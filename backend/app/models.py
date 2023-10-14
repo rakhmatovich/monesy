@@ -8,6 +8,12 @@ TYPES=(
     ('доход','доход')
 )
 
+class Cash(models.Model):
+    summ = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.summ
+
 
 
 class Card(models.Model):

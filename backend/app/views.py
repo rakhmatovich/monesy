@@ -11,18 +11,18 @@ from .models import  Card
 from blog.models import Token,User
 
 
-class CardList(APIView):
-    def get(self, request):
-        cards = Card.objects.all()
-        serializer = CardSerializer(cards, many=True)
-        return Response(serializer.data)
+# class CardList(APIView):
+#     def get(self, request):
+#         cards = Card.objects.all()
+#         serializer = CardSerializer(cards, many=True)
+#         return Response(serializer.data)
 
-    def post(self, request):
-        serializer = CardSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     def post(self, request):
+#         serializer = CardSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CardDetail(APIView):
     def get_object(self, pk):
@@ -170,6 +170,8 @@ class CardAPIView(APIView):
         cards = Card.objects.filter(user=user)
         serializer = CardSerializer(cards, many=True)
         return Response(serializer.data)
+    
+
 
 
 
