@@ -19,6 +19,13 @@ class Cash(models.Model):
     def __str__(self):
         return self.amount
 
+class UserBalance(models.Model):
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    balance = models.DecimalField(max_digits=10,decimal_places=2,default=0)
+
+    def __str__(self):
+        return str(self.balance)
+
 
 class Card(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

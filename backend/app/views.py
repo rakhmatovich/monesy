@@ -1,8 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Cash
-from .serializers import CashSerializer
+from .models import Cash,Card,UserBalance
+from .serializers import CashSerializer,CardSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -26,3 +26,31 @@ class CashView(APIView):
 
         serializer = CashSerializer(cash)
         return Response(serializer.data)
+
+class AddCardBalanceView(APIView):
+    def post(self,request):
+        user = request.user
+        card_id = request.data.get('card-id')
+        amount = request.data.get('amount')
+
+        if not card_id or not amount:
+            return Response({"error":'Card ID and amount are required.'},status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            card = Card.objects.filter(id=card_id,user=user)
+        except Card.DoesNotExist:
+            return Response({'error':'Card not found'},status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            user_balance = UserBalance.objects.filter(user=user)
+        except UserBalance.DoesNotExist:
+            user_balance = UserBalance(user=user)
+
+        user_balance.balance += amount
+        user_balance.save()
+
+        return  Response({
+            'message':'Balance added successfuly',
+            'card':CardSerializer(card).data,
+            'user_balance':user_balance.balance,
+        })
