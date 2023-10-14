@@ -1,9 +1,10 @@
 import React from 'react';
 import {Link, useLocation, useNavigate} from "react-router-dom";
-import {AiOutlineSetting, AiOutlineCalendar} from 'react-icons/ai'
+import {AiOutlineSetting} from 'react-icons/ai'
 import {FiPieChart} from 'react-icons/fi'
 import {BsWallet2} from 'react-icons/bs'
 import {IoLogOutOutline} from "react-icons/io5";
+import {FaMoneyBillTransfer} from "react-icons/fa6";
 
 function SideBar() {
     const {pathname} = useLocation()
@@ -35,16 +36,16 @@ function SideBar() {
                             <BsWallet2/> Dashboard
                         </div>
                     </Link>
+                     <Link to='/transactions'>
+                        <div
+                            className={`py-2 px-8 text-base-100 flex items-center gap-2 ${pathname === '/transactions' && 'border-l-4 border-l-base-100'}`}>
+                            <FaMoneyBillTransfer/> Transactions
+                        </div>
+                    </Link>
                     <Link to='/analytics'>
                         <div
                             className={`py-2 px-8 text-base-100 flex items-center gap-2 ${pathname === '/analytics' && 'border-l-4 border-l-base-100'}`}>
                             <FiPieChart/> Analytics
-                        </div>
-                    </Link>
-                    <Link to='/calendar'>
-                        <div
-                            className={`py-2 px-8 text-base-100 flex items-center gap-2 ${pathname === '/calendar' && 'border-l-4 border-l-base-100'}`}>
-                            <AiOutlineCalendar/> Calendar
                         </div>
                     </Link>
                     <Link to='/settings'>

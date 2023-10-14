@@ -15,6 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class CardListCreateView(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Card.objects.all()
     serializer_class = CardSerializer
 

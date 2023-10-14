@@ -1,14 +1,16 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {BiSolidBellRing} from 'react-icons/bi'
 import {months} from "../utils/month.js";
 import MyCard from "./MyCard.jsx";
+import AddCardForm from "./AddCardForm.jsx";
 
 function Dashboard() {
-
+    const [showModal,setShowModal] = useState(false)
     const date = new Date();
 
     return (
-        <div className='w-[55%] border-r border-gray-200 p-10 flex flex-col gap-10'>
+        <div className='w-[55%] h-screen border-r border-gray-200 p-10 flex flex-col gap-10 overflow-y-scroll'>
+            {showModal && <AddCardForm setShowModal={setShowModal} />}
             <div className="flex justify-between">
                 <div>
                     <h1 className="text-2xl font-bold">Dashboard</h1>
@@ -31,7 +33,7 @@ function Dashboard() {
                 </div>
                 <div className="border border-gray-200 h-[100%] mx-2"></div>
                 <div className="w-3/12">
-                    <p className="text-sm text-gray-400">Deposito</p>
+                    <p className="text-sm text-gray-400">Deposit</p>
                     <h1 className="text-2xl font-semibold my-2">$8.070.10</h1>
                     <p className="text-sm text-gray-400">8% of your money</p>
                 </div>
@@ -42,7 +44,7 @@ function Dashboard() {
                     <p className="text-sm text-gray-400">8% of your money</p>
                 </div>
             </div>
-            <MyCard />
+            <MyCard setShowModal={setShowModal} />
         </div>
     );
 }
