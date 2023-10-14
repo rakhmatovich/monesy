@@ -8,7 +8,7 @@ function Dashboard() {
     const date = new Date();
 
     return (
-        <div className='w-[60%] border-r border-gray-200 p-10 flex flex-col gap-10'>
+        <div className='w-[55%] border-r border-gray-200 p-10 flex flex-col gap-10'>
             <div className="flex justify-between">
                 <div>
                     <h1 className="text-2xl font-bold">Dashboard</h1>
