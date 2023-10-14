@@ -14,33 +14,9 @@ from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated
 
 
-class CardAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
-    def post(self, request):
-        card_data = request.data
-
-        try:
-            token = Token.objects.get(token=card_data['token'])
-            user = token.user
-        except Token.DoesNotExist:
-            return Response({'message': 'Вы должны зарегистрироваться'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        card = Card(user=user, card_number=card_data['card_number'], expiration_date=card_data['expiration_date'], cvv=card_data['cvv'])
-        card.save()
-
-        serializer = CardSerializer(card)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def get(self, request):
-        try:
-            token = Token.objects.get(token=request.GET.get('token'))
-            user = token.user
-        except Token.DoesNotExist:
-            return Response({'message': 'Вы должны зарегистрироваться'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        cards = Card.objects.filter(user=user)
-        serializer = CardSerializer(cards, many=True)
-        return Response(serializer.data)
+class CardListCreateView(generics.ListCreateAPIView):
+    queryset = Card.objects.all()
+    serializer_class = CardSerializer
 
 class CardDetail(APIView):
     permission_classes  = (IsAuthenticated,)

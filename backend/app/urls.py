@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import CardAPIView, CardDetail,CategoryDetail,CategoryList,UserSpending,SpendingLimit,CashListCreateView, CashDetailView 
+from .views import CardListCreateView, CardDetail,CategoryDetail,CategoryList,UserSpending,SpendingLimit,CashListCreateView, CashDetailView 
 
 urlpatterns = [
-    path('cards/', CardAPIView.as_view(),name='card'),
+    path('cards/', CardListCreateView.as_view(),name='card'),
     path('cards/<int:pk>/', CardDetail.as_view(), name='card-detail'),
     path('categories/', CategoryList.as_view(), name='category-list'),
     path('categories/<int:pk>/', CategoryDetail.as_view(), name='category-detail'),
