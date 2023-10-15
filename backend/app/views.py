@@ -43,47 +43,31 @@ class CategoryView(APIView):
         return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
 
 
-class TransactionView(APIView):
-    def post(self,request):
-        data = request.data
-        card_id = data.get('card_id')
-        cash_id = data.get('cash_id')
-        amount = data.get('amount')
-        is_income = data.get('is_income')
 
-        if not card_id or not cash_id or not amount:
-            return Response({'error':'Card ID, Cash ID, and amount are required.'},status=status.HTTP_400_BAD_REQUEST)
+class IncomeExpence(APIView):
+    def get(self,request,*args,**kwargs):
+        user = request.user
+        transactions = Transaction.objects.filter(user=user)
+        income = 0
+        expenses = {}
 
-        try:
-            card = Card.objects.filter(id=card_id)
-        except Card.DoesNotExist:
-            return Response({'error':'Card not Found.'},status=status.HTTP_404_NOT_FOUND)
+        for transaction in transactions:
+            if transaction.cash.type == 'income':
+                income += transaction.cash.amount
+            else:
+                category = transaction.category.name
+                if category in expenses:
+                    expenses[category]+=transaction.cash.amount
+                else:
+                    expenses[category] = transaction.cash.amount
 
-        try:
-            cash = Cash.objects.filter(id=cash_id)
-        except Cash.DoesNotExist:
-            return Response({'error':'Cash not found'},status=status.HTTP_404_NOT_FOUND)
+        result = {
+            'income':income,
+            'expenses':expenses
+        }
 
-        transaction = Transaction(
-            card=card,
-            cash=cash,
-            amount=amount,
-            category=None
+        return Response(result)
 
-        )
-
-        transaction.save()
-
-        if is_income:
-            cash.amount += amount
-        else:
-            cash.amount -= amount
-
-        cash.save()
-
-
-        transaction_serializer = TransactionSerializer(transaction)
-        return Response(transaction_serializer.data,status=status.HTTP_201_CREATED)
 
 
 class AddCartToCashView(APIView):

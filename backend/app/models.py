@@ -45,10 +45,12 @@ class Category(models.Model):
 class Transaction(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    card = models.ForeignKey(Card, on_delete=models.CASCADE)
     cash = models.ForeignKey(Cash,on_delete=models.CASCADE)
 
-    
+    def __str__(self):
+        return self.category
+
+
 
 
 class Limit(models.Model):
@@ -58,3 +60,4 @@ class Limit(models.Model):
 
     def __str__(self):
         return self.amount
+
