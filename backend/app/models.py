@@ -48,8 +48,7 @@ class Transaction(models.Model):
     card = models.ForeignKey(Card, on_delete=models.CASCADE)
     cash = models.ForeignKey(Cash,on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.amount
+    
 
 
 class Limit(models.Model):
