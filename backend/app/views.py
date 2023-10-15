@@ -84,6 +84,11 @@ class TransactionView(APIView):
         transaction_serializer = TransactionSerializer(transaction)
         return Response(transaction_serializer.data,status=status.HTTP_201_CREATED)
 
+class UserTransactionSummaryAPIVIew(APIView):
+    def get(self,request,format=None):
+        user = request.user
+        income = Transaction.objects.filter(user=user)
+
 class AddCartToCashView(APIView):
     def post(self,request):
         data = request.data

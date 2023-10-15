@@ -36,12 +36,14 @@ class Card(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=100, choices=TYPES)
+    color = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name
 
 
 class Transaction(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     card = models.ForeignKey(Card, on_delete=models.CASCADE)
     cash = models.ForeignKey(Cash,on_delete=models.CASCADE)
