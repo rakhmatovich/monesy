@@ -19,16 +19,12 @@ class Cash(models.Model):
     def __str__(self):
         return self.amount
 
-class UserBalance(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
-    balance = models.DecimalField(max_digits=10,decimal_places=2,default=0)
 
-    def __str__(self):
-        return str(self.balance)
 
 
 class Card(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    cash = models.ForeignKey(Cash,on_delete=models.CASCADE)
     card_number = models.CharField(max_length=20)
     expiration_date = models.CharField(max_length=30)
     cv = models.CharField(max_length=10)
@@ -46,9 +42,9 @@ class Category(models.Model):
 
 
 class Transaction(models.Model):
-    amount = models.CharField(max_length=100)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     card = models.ForeignKey(Card, on_delete=models.CASCADE)
+    cash = models.ForeignKey(Cash,on_delete=models.CASCADE)
 
     def __str__(self):
         return self.amount
