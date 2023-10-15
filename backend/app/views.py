@@ -4,6 +4,7 @@ from rest_framework import status
 from .models import Cash,Card,Category,Transaction,Limit
 from .serializers import CashSerializer,CardSerializer,CategorySerializer,TransactionSerializer
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Sum
 
 
 class CashView(APIView):
@@ -42,52 +43,67 @@ class CategoryView(APIView):
         return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
 
 
-class TransactionView(APIView):
-    def post(self,request):
-        data = request.data
-        card_id = data.get('card_id')
-        cash_id = data.get('cash_id')
-        amount = data.get('amount')
-        is_income = data.get('is_income')
-
-        if not card_id or not cash_id or not amount:
-            return Response({'error':'Card ID, Cash ID, and amount are required.'},status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            card = Card.objects.filter(id=card_id)
-        except Card.DoesNotExist:
-            return Response({'error':'Card not Found.'},status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            cash = Cash.objects.filter(id=cash_id)
-        except Cash.DoesNotExist:
-            return Response({'error':'Cash not found'},status=status.HTTP_404_NOT_FOUND)
-
-        transaction = Transaction(
-            card=card,
-            cash=cash,
-            amount=amount,
-            category=None
-
-        )
-
-        transaction.save()
-
-        if is_income:
-            cash.amount += amount
-        else:
-            cash.amount -= amount
-
-        cash.save()
-
-
-        transaction_serializer = TransactionSerializer(transaction)
-        return Response(transaction_serializer.data,status=status.HTTP_201_CREATED)
+# class TransactionView(APIView):
+#     def post(self,request):
+#         data = request.data
+#         card_id = data.get('card_id')
+#         cash_id = data.get('cash_id')
+#         amount = data.get('amount')
+#         is_income = data.get('is_income')
+#
+#         if not card_id or not cash_id or not amount:
+#             return Response({'error':'Card ID, Cash ID, and amount are required.'},status=status.HTTP_400_BAD_REQUEST)
+#
+#         try:
+#             card = Card.objects.filter(id=card_id)
+#         except Card.DoesNotExist:
+#             return Response({'error':'Card not Found.'},status=status.HTTP_404_NOT_FOUND)
+#
+#         try:
+#             cash = Cash.objects.filter(id=cash_id)
+#         except Cash.DoesNotExist:
+#             return Response({'error':'Cash not found'},status=status.HTTP_404_NOT_FOUND)
+#
+#         transaction = Transaction(
+#             card=card,
+#             cash=cash,
+#             amount=amount,
+#             category=None
+#
+#         )
+#
+#         transaction.save()
+#
+#         if is_income:
+#             cash.amount += amount
+#         else:
+#             cash.amount -= amount
+#
+#         cash.save()
+#
+#
+#         transaction_serializer = TransactionSerializer(transaction)
+#         return Response(transaction_serializer.data,status=status.HTTP_201_CREATED)
 
 class UserTransactionSummaryAPIVIew(APIView):
     def get(self,request,format=None):
         user = request.user
-        income = Transaction.objects.filter(user=user)
+        income = Transaction.objects.filter(user=user).aggregate(income=Sum('amount'))['income']
+
+        expenses_by_category = Transaction.objects.filter(user=user).values('category__name').annotate(expenses=Sum('amount'))
+        total_expenses = sum(expense['expenses'] for expense in expenses_by_category)
+        total_money_received = Transaction.objects.filter(user=user, category__name='Received').aggregate(total_received=Sum('amount'))['total_received']
+        cash_balance = Transaction.objects.filter(user=user,cash_isnull=False).aggregate(cash_balance=Sum('amount'))['cash_balance']
+        card_balance = Transaction.objects.filter(user=user,card_balance=False).aggregate(card_balance=Sum('amount'))['card_balance']
+
+        data = {
+            'income':income,
+            'total_expenses':total_expenses,
+            'total_money_received':total_money_received,
+            'cash_balance':cash_balance,
+            'card_balance':card_balance
+        }
+        return Response(data)
 
 class AddCartToCashView(APIView):
     def post(self,request):
